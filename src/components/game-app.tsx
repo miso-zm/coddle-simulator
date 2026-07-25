@@ -17,7 +17,6 @@ import {
   LOSE_SCORE,
   TOTAL_ROUNDS,
 } from "@/lib/constants";
-import { AffinityBar } from "./affinity-bar";
 import { ChatBubble, TypingBubble } from "./chat-bubble";
 import { OptionButtons } from "./option-buttons";
 import { Avatar } from "./avatar";
@@ -352,36 +351,50 @@ export function GameApp() {
 
   // 游戏中 / 结束
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#EDEDED] relative overflow-hidden">
-      {/* 顶部栏 */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[#EDEDED] border-b border-gray-200">
+    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#EDEDED] relative overflow-hidden wechat-bg">
+      {/* 顶部导航栏 - 微信风格 */}
+      <div className="flex items-center justify-between px-3 py-2.5 bg-[#EDEDED] border-b border-gray-200/70 z-10">
         <button
           onClick={backToScenes}
-          className="text-gray-600 hover:text-gray-800 p-1 -ml-1 btn-press"
+          className="text-gray-700 hover:text-gray-900 p-1 -ml-1 btn-press flex items-center gap-0.5"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
+          <span className="text-[15px]">返回</span>
         </button>
-        <div className="text-sm font-medium text-gray-700">
+        <div className="text-[16px] font-medium text-gray-900">
           {scene?.title}
         </div>
-        <div className="w-6" /> {/* 占位 */}
+        <button className="text-gray-700 p-1 -mr-1 btn-press">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="1.8" />
+            <circle cx="12" cy="12" r="1.8" />
+            <circle cx="19" cy="12" r="1.8" />
+          </svg>
+        </button>
       </div>
-
-      {/* 好感度进度条 */}
-      <AffinityBar
-        score={score}
-        round={Math.min(round, TOTAL_ROUNDS)}
-        totalRounds={TOTAL_ROUNDS}
-        animateDirection={animateDirection}
-      />
 
       {/* 聊天区域 */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide"
+        className="flex-1 overflow-y-auto px-3 py-3 scrollbar-hide"
       >
+        {/* 好感度系统提示（嵌在对话中，像微信的系统提示） */}
+        <div className="flex justify-center mb-3">
+          <div className={cn(
+            "bg-black/10 text-white/90 text-[11px] px-3 py-1 rounded-md backdrop-blur-sm transition-all duration-300",
+            animateDirection === "up" && "bg-green-500/30",
+            animateDirection === "down" && "bg-red-500/30",
+          )}>
+            <span className="mr-1">💬 第 {Math.min(round, TOTAL_ROUNDS)} 轮 / 共 {TOTAL_ROUNDS} 轮</span>
+            <span className="mx-1 text-white/50">·</span>
+            <span>好感度 {score}</span>
+            <span className="mx-1 text-white/50">·</span>
+            <span>目标 80</span>
+          </div>
+        </div>
+
         {messages.map((msg, idx) => (
           <ChatBubble
             key={msg.id}
@@ -408,43 +421,64 @@ export function GameApp() {
         )}
       </div>
 
-      {/* 选项区域 */}
+      {/* 底部区域 - 微信输入框风格 */}
       {(phase === "playing" || phase === "won" || phase === "lost") &&
         currentOptions.length > 0 && (
-          <div className="bg-white border-t border-gray-200 p-3 pb-safe">
-            {phase === "playing" && (
-              <OptionButtons
-                options={currentOptions}
-                onSelect={(opt) => {
-                  const idx = currentOptions.indexOf(opt);
-                  handleSelectOption(opt, idx);
-                }}
-                disabled={isLoading}
-                selectedIndex={selectedOption}
-              />
-            )}
+          <div className="bg-[#F7F7F7] border-t border-gray-200/70">
+            {/* 工具栏一行 */}
+            <div className="flex items-center px-2 py-1.5 gap-2">
+              <button className="p-1.5 text-gray-500 btn-press">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <div className="flex-1 h-9 bg-white rounded-lg px-3 flex items-center text-gray-400 text-sm">
+                选择下方回复内容
+              </div>
+              <button className="p-1.5 text-gray-500 btn-press">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <rect x="4" y="4" width="16" height="16" rx="3" />
+                  <path d="M4 8h16M8 4v16" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
 
-            {phase === "won" && (
-              <EndScreen
-                won={true}
-                rounds={round}
-                score={score}
-                scene={scene}
-                onRestart={restartGame}
-                onSwitchScene={backToScenes}
-              />
-            )}
+            {/* 选项 / 结束面板 */}
+            <div className="px-3 pt-1 pb-3 pb-safe">
+              {phase === "playing" && (
+                <OptionButtons
+                  options={currentOptions}
+                  onSelect={(opt) => {
+                    const idx = currentOptions.indexOf(opt);
+                    handleSelectOption(opt, idx);
+                  }}
+                  disabled={isLoading}
+                  selectedIndex={selectedOption}
+                />
+              )}
 
-            {phase === "lost" && (
-              <EndScreen
-                won={false}
-                rounds={round}
-                score={score}
-                scene={scene}
-                onRestart={restartGame}
-                onSwitchScene={backToScenes}
-              />
-            )}
+              {phase === "won" && (
+                <EndScreen
+                  won={true}
+                  rounds={round}
+                  score={score}
+                  scene={scene}
+                  onRestart={restartGame}
+                  onSwitchScene={backToScenes}
+                />
+              )}
+
+              {phase === "lost" && (
+                <EndScreen
+                  won={false}
+                  rounds={round}
+                  score={score}
+                  scene={scene}
+                  onRestart={restartGame}
+                  onSwitchScene={backToScenes}
+                />
+              )}
+            </div>
           </div>
         )}
     </div>

@@ -44,7 +44,7 @@ export function ChatBubble({ message, gender, isLatest }: ChatBubbleProps) {
   return (
     <div
       className={cn(
-        "flex gap-2 mb-4 animate-bubble-in",
+        "flex gap-2 mb-3 animate-bubble-in",
         isPartner ? "justify-start" : "justify-end flex-row-reverse",
       )}
     >
@@ -53,10 +53,10 @@ export function ChatBubble({ message, gender, isLatest }: ChatBubbleProps) {
       <div className="max-w-[70%]">
         <div
           className={cn(
-            "relative px-4 py-2.5 text-[15px] leading-relaxed shadow-sm",
+            "relative px-3.5 py-2.5 text-[15px] leading-relaxed",
             isPartner
-              ? "bg-white text-gray-800 rounded-2xl rounded-tl-md bubble-left"
-              : "bg-[#95EC69] text-gray-800 rounded-2xl rounded-tr-md bubble-right",
+              ? "bg-white text-gray-800 rounded-[4px] rounded-tl-none bubble-left-wechat"
+              : "bg-[#95EC69] text-gray-800 rounded-[4px] rounded-tr-none bubble-right-wechat",
           )}
         >
           {message.text}
@@ -122,13 +122,13 @@ export function ChatBubble({ message, gender, isLatest }: ChatBubbleProps) {
 // 正在输入的占位气泡
 export function TypingBubble({ gender }: { gender: "girlfriend" | "boyfriend" | null }) {
   return (
-    <div className="flex gap-2 mb-4 animate-bubble-in">
+    <div className="flex gap-2 mb-3 animate-bubble-in">
       <Avatar role="partner" gender={gender} size="md" />
-      <div className="relative px-4 py-3 bg-white rounded-2xl rounded-tl-md shadow-sm bubble-left">
-        <div className="flex gap-1">
-          <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full" />
-          <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full" />
-          <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full" />
+      <div className="relative px-4 py-3 bg-white rounded-[4px] rounded-tl-none bubble-left-wechat">
+        <div className="flex gap-1.5 items-end h-4">
+          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
+          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
+          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
         </div>
       </div>
     </div>

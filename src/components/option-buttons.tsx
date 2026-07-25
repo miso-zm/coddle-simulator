@@ -17,25 +17,25 @@ export function OptionButtons({
   selectedIndex,
 }: OptionButtonsProps) {
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-1.5 w-full">
+      <div className="text-[11px] text-gray-400 px-1 mb-0.5">
+        选择你要说的话
+      </div>
       {options.map((option, index) => (
         <button
           key={index}
           onClick={() => !disabled && onSelect(option)}
           disabled={disabled}
           className={cn(
-            "w-full px-4 py-3 text-left text-[15px] rounded-xl border transition-all duration-200 btn-press",
-            "min-h-[44px]",
+            "w-full px-4 py-2.5 text-left text-[14px] rounded-2xl border transition-all duration-150 btn-press",
+            "min-h-[40px] leading-relaxed",
             selectedIndex === index
-              ? "bg-pink-50 border-pink-300 text-pink-600"
-              : "bg-white border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50/50 active:scale-[0.98]",
+              ? "bg-[#95EC69]/20 border-[#7ED321]/40 text-gray-800"
+              : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99]",
             disabled && selectedIndex !== index &&
-              "opacity-50 cursor-not-allowed hover:border-gray-200 hover:bg-white",
+              "opacity-60 cursor-not-allowed hover:border-gray-200 hover:bg-white",
           )}
         >
-          <span className="mr-2 text-pink-400 text-sm font-medium">
-            {index + 1}.
-          </span>
           {option.text}
         </button>
       ))}
