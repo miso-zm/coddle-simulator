@@ -56,6 +56,40 @@ export function GameApp() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const preloadPromiseRef = useRef<{
+    sceneId: string;
+    promise: Promise<{ message: string; scoreChange: number; options: ChatOption[]; selectedAnalysis: string }>;
+  } | null>(null);
+
+  // 预加载第一轮对话（点击场景时立刻触发，不阻塞 UI）
+  const preloadFirstRound = useCallback(
+    (selectedScene: Scene) => {
+      if (!gender || !voice) return;
+      // 如果已有同一个场景的预加载，直接复用
+      if (preloadPromiseRef.current?.sceneId === selectedScene.id) return;
+
+      const promise = fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gender,
+          voice,
+          sceneId: selectedScene.id,
+          round: 1,
+          totalRounds: TOTAL_ROUNDS,
+          currentScore: INITIAL_SCORE,
+          history: [],
+          generateAudio: false,
+        }),
+      }).then(async (res) => {
+        if (!res.ok) throw new Error("预加载失败");
+        return res.json();
+      });
+
+      preloadPromiseRef.current = { sceneId: selectedScene.id, promise };
+    },
+    [gender, voice],
+  );
 
   // 初始化时读取本地存储
   useEffect(() => {
@@ -116,26 +150,34 @@ export function GameApp() {
       setError(null);
 
       try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            gender,
-            voice,
-            sceneId: selectedScene.id,
-            round: 1,
-            totalRounds: TOTAL_ROUNDS,
-            currentScore: INITIAL_SCORE,
-            history: [],
-            generateAudio: true,
-          }),
-        });
+        // 优先使用预加载的结果
+        let data: { message: string; scoreChange: number; options: ChatOption[]; selectedAnalysis: string };
 
-        if (!response.ok) {
-          throw new Error("网络错误");
+        if (preloadPromiseRef.current?.sceneId === selectedScene.id) {
+          data = await preloadPromiseRef.current.promise;
+          preloadPromiseRef.current = null;
+        } else {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              gender,
+              voice,
+              sceneId: selectedScene.id,
+              round: 1,
+              totalRounds: TOTAL_ROUNDS,
+              currentScore: INITIAL_SCORE,
+              history: [],
+              generateAudio: false,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("网络错误");
+          }
+
+          data = await response.json();
         }
-
-        const data = await response.json();
 
         const firstMessage: ChatMessage = {
           id: `msg-${Date.now()}`,
@@ -353,7 +395,10 @@ export function GameApp() {
   if (phase === "scene-select") {
     return (
       <SceneSelectScreen
-        onSelect={startGame}
+        onSelect={(scene) => {
+          preloadFirstRound(scene);
+          startGame(scene);
+        }}
         onBack={() => setPhase("home")}
         onVoiceSettings={() => setPhase("voice-select")}
         gender={gender}
@@ -452,12 +497,24 @@ export function GameApp() {
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-4 py-3 pretty-scroll relative z-10"
       >
-        {/* 轮次提示 */}
+        {/* 轮次提示 + 场景信息 */}
         <div className="flex justify-center mb-4">
           <div className="system-msg">
             第 {Math.min(round, TOTAL_ROUNDS)} / {TOTAL_ROUNDS} 轮
           </div>
         </div>
+
+        {/* 场景开场提示（仅第一轮显示） */}
+        {round === 1 && scene && (
+          <div className="flex justify-center mb-6 animate-fade-in">
+            <div className="max-w-[80%] bg-white/60 backdrop-blur-sm border border-pink-100 rounded-2xl px-4 py-3 shadow-sm">
+              <div className="text-[11px] text-pink-400 font-medium mb-1">📌 场景</div>
+              <p className="text-[13px] text-gray-600 leading-relaxed">
+                {scene.shortDesc}
+              </p>
+            </div>
+          </div>
+        )}
 
         {messages.map((msg) => (
           <div key={msg.id} className="mb-4">
