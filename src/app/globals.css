@@ -3,13 +3,59 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* 哄哄模拟器自定义样式 */
+/* 哄哄模拟器 — 精品对话风格 */
 
-/* 气泡动画 */
+/* ====== 背景 ====== */
+.chat-bg {
+  background: linear-gradient(135deg, #FFF0F5 0%, #FFE8EE 25%, #FFF5F0 50%, #FFF0F5 75%, #FFE4EC 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-bg::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 60%;
+  height: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 182, 193, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.chat-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -15%;
+  right: -15%;
+  width: 55%;
+  height: 45%;
+  background: radial-gradient(ellipse at center, rgba(255, 200, 180, 0.35) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ====== 玻璃拟态 ====== */
+.glass-nav {
+  background: rgba(255, 248, 250, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 180, 200, 0.2);
+}
+
+.glass-input {
+  background: rgba(255, 248, 250, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 180, 200, 0.2);
+}
+
+/* ====== 气泡 ====== */
 @keyframes bubbleIn {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(12px) scale(0.96);
   }
   100% {
     opacity: 1;
@@ -18,10 +64,56 @@
 }
 
 .animate-bubble-in {
-  animation: bubbleIn 0.25s ease-out forwards;
+  animation: bubbleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* 打字机点点 */
+/* 对方气泡 */
+.bubble-other {
+  background: #FFFFFF;
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 157, 0.08),
+    0 8px 24px rgba(255, 107, 157, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  border-radius: 8px 20px 20px 20px;
+  position: relative;
+}
+
+.bubble-other::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  background: #FFFFFF;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  box-shadow: 0 2px 4px rgba(255, 107, 157, 0.04);
+}
+
+/* 我方气泡 */
+.bubble-me {
+  background: linear-gradient(135deg, #FF8FAB 0%, #FF6B9D 100%);
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 157, 0.25),
+    0 8px 24px rgba(255, 107, 157, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  border-radius: 20px 8px 20px 20px;
+  color: white;
+  position: relative;
+}
+
+.bubble-me::before {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #FF8FAB 0%, #FF6B9D 100%);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+/* ====== 打字机点点 ====== */
 @keyframes typingDot {
   0%, 60%, 100% {
     opacity: 0.3;
@@ -29,179 +121,177 @@
   }
   30% {
     opacity: 1;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 }
 
 .typing-dot {
   animation: typingDot 1.4s ease-in-out infinite;
+  background: #FF6B9D;
 }
 
-.typing-dot:nth-child(2) {
-  animation-delay: 0.2s;
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ====== 好感度进度条 ====== */
+.affinity-bar {
+  height: 24px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 180, 200, 0.3);
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 157, 0.08) inset,
+    0 1px 2px rgba(0,0,0,0.04);
 }
 
-.typing-dot:nth-child(3) {
-  animation-delay: 0.4s;
+.affinity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFB3C6 0%, #FF8FAB 40%, #FF6B9D 100%);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 0 12px rgba(255, 107, 157, 0.3);
 }
 
-/* 好感度进度条动画 */
+.affinity-fill::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  right: 30%;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 999px;
+}
+
 @keyframes scoreUp {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  40% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.15); }
+  100% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
 }
 
 @keyframes scoreDown {
-  0% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-3px);
-  }
-  40% {
-    transform: translateX(3px);
-  }
-  60% {
-    transform: translateX(-2px);
-  }
-  80% {
-    transform: translateX(2px);
-  }
-  100% {
-    transform: translateX(0);
-  }
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
 }
 
-.animate-score-up {
-  animation: scoreUp 0.6s ease-out;
-}
+.animate-score-up { animation: scoreUp 0.7s ease-out; }
+.animate-score-down { animation: scoreDown 0.5s ease-out; }
 
-.animate-score-down {
-  animation: scoreDown 0.4s ease-out;
-}
-
-/* 撒花动画 */
-@keyframes confettiFall {
-  0% {
-    transform: translateY(-100%) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-.confetti-piece {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  top: -20px;
-  animation: confettiFall 3s ease-in forwards;
-}
-
-/* 心碎动画 */
-@keyframes heartBreak {
-  0% {
-    transform: scale(1);
-  }
-  20% {
-    transform: scale(1.2);
-  }
-  40% {
-    transform: scale(0.9);
-  }
-  60% {
-    transform: scale(1.05);
-  }
-  80% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-}
-
-.animate-heart-break {
-  animation: heartBreak 0.8s ease-out;
-}
-
-/* 页面淡入 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-/* 数字弹跳 */
+/* ====== 数字弹跳 ====== */
 @keyframes bounceIn {
-  0% {
-    transform: scale(1);
-  }
-  30% {
-    transform: scale(1.4);
-  }
-  50% {
-    transform: scale(0.9);
-  }
-  70% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0.6); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .animate-bounce-in {
-  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* 按钮点击效果 */
-.btn-press:active {
-  transform: scale(0.97);
-  transition: transform 0.1s ease;
+/* ====== 选项按钮 ====== */
+.option-btn {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF8FA 100%);
+  border: 1px solid rgba(255, 180, 200, 0.35);
+  border-radius: 16px;
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 157, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-/* 底部安全区域 */
-.pb-safe {
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  border-radius: 16px 16px 0 0;
 }
 
-/* 隐藏滚动条但可滚动 */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+.option-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 107, 157, 0.15),
+    0 2px 8px rgba(255, 107, 157, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  border-color: rgba(255, 107, 157, 0.5);
 }
 
-/* 心跳动画 */
+.option-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 1px 4px rgba(255, 107, 157, 0.1),
+    0 1px 2px rgba(255, 255, 255, 0.5) inset;
+}
+
+.option-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-number {
+  background: linear-gradient(135deg, #FF8FAB 0%, #FF6B9D 100%);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(255, 107, 157, 0.25);
+}
+
+/* ====== 沟通小贴士 ====== */
+.tip-card {
+  background: linear-gradient(135deg, #FEF7EC 0%, #FFF5EE 100%);
+  border: 1px solid rgba(255, 140, 66, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(255, 140, 66, 0.08);
+  position: relative;
+}
+
+.tip-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 14px 14px 0 0;
+  pointer-events: none;
+}
+
+.tip-card-green {
+  background: linear-gradient(135deg, #ECFDF5 0%, #F0FDF4 100%);
+  border-color: rgba(34, 197, 94, 0.2);
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.08);
+}
+
+/* ====== 撒花动画 ====== */
+@keyframes confettiFall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  animation: confettiFall 3s ease-in forwards;
+}
+
+/* ====== 心跳动画 ====== */
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
   15% { transform: scale(1.12); }
@@ -209,280 +299,136 @@
   45% { transform: scale(1.08); }
   60% { transform: scale(1); }
 }
+
 .animate-heartbeat {
   animation: heartbeat 2s ease-in-out infinite;
-  transform-origin: center;
 }
 
-/* 微信气泡尾巴 */
-.bubble-left-wechat::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-right: 6px solid white;
+/* ====== 淡入 ====== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.bubble-right-wechat::before {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 6px solid #95EC69;
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* 微信聊天背景 — 暖灰色调 + 细腻网点纹理 */
-.wechat-bg {
-  background-color: #EDEDED;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(0,0,0,0.015) 1px, transparent 1px),
-    radial-gradient(circle at 30% 70%, rgba(0,0,0,0.01) 1px, transparent 1px);
-  background-size: 16px 16px, 24px 24px;
-  background-position: 0 0, 8px 8px;
+/* ====== 淡入上移 ====== */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* 顶部栏微妙渐变 */
-.wechat-nav {
-  background: linear-gradient(180deg, #F0F0F0 0%, #EBEBEB 100%);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* 底部输入栏微妙渐变 */
-.wechat-input-bar {
-  background: linear-gradient(180deg, #F6F6F6 0%, #F2F2F2 100%);
-  border-top: 1px solid rgba(0,0,0,0.06);
-}
-
-/* 气泡内阴影（更有实体感） */
-.bubble-shine-left {
-  box-shadow: 
-    0 1px 2px rgba(0,0,0,0.06),
-    0 1px 1px rgba(0,0,0,0.03),
-    inset 0 0.5px 0 rgba(255,255,255,0.8);
-}
-
-.bubble-shine-right {
-  box-shadow: 
-    0 1px 2px rgba(0,0,0,0.08),
-    0 1px 1px rgba(0,0,0,0.04);
-}
-
-/* 气泡尾巴 - 更柔和的微信风格（SVG path 感） */
-.bubble-left-wechat::before {
-  content: '';
-  position: absolute;
-  left: -5px;
-  top: 12px;
-  width: 7px;
-  height: 7px;
-  background: white;
-  clip-path: polygon(100% 0, 0 30%, 100% 100%);
-  box-shadow: -1px 0 1px rgba(0,0,0,0.04);
-}
-
-.bubble-right-wechat::before {
-  content: '';
-  position: absolute;
-  right: -5px;
-  top: 12px;
-  width: 7px;
-  height: 7px;
-  background: #95EC69;
-  clip-path: polygon(0 0, 100% 30%, 0 100%);
-  box-shadow: 1px 0 1px rgba(0,0,0,0.05);
-}
-
-/* 选项快捷回复气泡 */
-.quick-reply-bubble {
+/* ====== 头像光环 ====== */
+.avatar-ring {
   position: relative;
-  background: white;
-  border-radius: 14px;
-  transition: all 0.2s ease;
-  box-shadow: 
-    0 1px 3px rgba(0,0,0,0.06),
-    0 1px 1px rgba(0,0,0,0.03),
-    inset 0 0.5px 0 rgba(255,255,255,0.9);
 }
 
-.quick-reply-bubble:hover {
-  background: #F9F9F9;
-  transform: translateY(-1px);
-  box-shadow: 
-    0 3px 8px rgba(0,0,0,0.08),
-    0 1px 2px rgba(0,0,0,0.05),
-    inset 0 0.5px 0 rgba(255,255,255,0.9);
+.avatar-ring::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFB3C6 0%, #FF6B9D 50%, #FF8C42 100%);
+  z-index: -1;
+  opacity: 0.6;
+  filter: blur(4px);
 }
 
-.quick-reply-bubble:active {
-  transform: scale(0.98);
-  background: #F3F3F3;
-}
-
-/* 微信系统消息样式 */
-.wechat-sys-msg {
-  background: rgba(0,0,0,0.12);
-  color: rgba(255,255,255,0.9);
-  border-radius: 6px;
-  backdrop-filter: blur(6px);
+/* ====== 情绪标签 ====== */
+.mood-tag {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.12) 0%, rgba(255, 140, 66, 0.1) 100%);
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  border-radius: 999px;
+  padding: 2px 10px;
   font-size: 11px;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-/* 微信输入框 */
-.wechat-input {
-  background: white;
-  border-radius: 8px;
+/* ====== 底部输入框 ====== */
+.input-field {
+  background: #FFFFFF;
+  border: 1px solid rgba(255, 180, 200, 0.3);
+  border-radius: 12px;
   box-shadow: 
-    inset 0 1px 2px rgba(0,0,0,0.04),
-    0 0.5px 0 rgba(0,0,0,0.02);
+    0 2px 8px rgba(255, 107, 157, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.02) inset;
+  transition: all 0.2s ease;
 }
 
-/* 沟通小贴士卡片 */
-.analysis-card {
-  background: linear-gradient(135deg, #FEF7EC 0%, #FFF9F2 100%);
-  border: 1px solid rgba(255,183,77,0.2);
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(255,152,0,0.05);
+/* ====== 滚动条美化 ====== */
+.pretty-scroll::-webkit-scrollbar {
+  width: 4px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-  --font-sans:
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-sans-serif,
-    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
-  --font-serif:
-    'Noto Serif SC', 'Songti SC', 'SimSun', ui-serif, Georgia, Cambria,
-    'Times New Roman', Times, serif;
+.pretty-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+.pretty-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 157, 0.2);
+  border-radius: 999px;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+.pretty-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 157, 0.4);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* ====== 系统消息 ====== */
+.system-msg {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 180, 200, 0.2);
+  font-size: 12px;
+  color: #999;
+  padding: 6px 14px;
 }
 
-body {
-  @apply font-sans;
+.system-msg-green {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.system-msg-red {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* ====== 语音按钮 ====== */
+.voice-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 180, 200, 0.25);
+  border-radius: 999px;
+  color: #FF6B9D;
+  font-size: 11px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.voice-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.12);
+}
+
+.voice-btn:active {
+  transform: scale(0.95);
 }

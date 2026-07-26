@@ -17,7 +17,7 @@ import {
   LOSE_SCORE,
   TOTAL_ROUNDS,
 } from "@/lib/constants";
-import { ChatBubble, TypingBubble } from "./chat-bubble";
+import { ChatBubble } from "./chat-bubble";
 import { OptionButtons } from "./option-buttons";
 import { Avatar } from "./avatar";
 import { cn } from "@/lib/utils";
@@ -353,74 +353,113 @@ export function GameApp() {
 
   // 游戏中 / 结束
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#EDEDED] relative overflow-hidden wechat-bg md:shadow-2xl md:my-4 md:rounded-2xl md:h-[calc(100vh-2rem)] md:border md:border-gray-200/50">
-      {/* 顶部导航栏 - 精致微信风格 */}
-      <div className="wechat-nav flex items-center justify-between px-4 py-2.5 z-20">
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden chat-bg md:shadow-2xl md:my-4 md:rounded-3xl md:h-[calc(100vh-2rem)] md:border md:border-pink-100">
+      {/* 顶部导航栏 — 玻璃拟态 */}
+      <div className="glass-nav flex items-center justify-between px-4 py-3 z-20 relative">
         <button
           onClick={backToScenes}
-          className="flex items-center gap-0.5 text-gray-700 hover:text-gray-900 p-1 -ml-1.5 btn-press"
+          className="flex items-center gap-1 text-pink-500 hover:text-pink-600 p-1 -ml-1.5 transition-colors active:scale-95"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
+          <span className="text-sm">返回</span>
         </button>
+
         <div className="flex flex-col items-center">
-          <div className="text-[15px] font-semibold text-gray-900 tracking-tight">
+          <div className="text-[15px] font-semibold text-gray-800 tracking-tight flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 flex items-center justify-center text-white text-[10px] font-bold">
+              TA
+            </div>
             {scene?.title}
           </div>
+          <div className="mood-tag text-pink-600 mt-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
+            {score >= 80 ? "已原谅" : score >= 60 ? "快哄好了" : score >= 30 ? "开始软化" : score >= 0 ? "还在生气" : "非常生气"}
+          </div>
         </div>
-        <button className="p-1 -mr-1.5 text-gray-700 btn-press">
-          <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="1.7" />
-            <circle cx="12" cy="12" r="1.7" />
-            <circle cx="19" cy="12" r="1.7" />
+
+        <button className="p-1.5 -mr-1 text-pink-400 hover:text-pink-600 transition-colors active:scale-95">
+          <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
           </svg>
         </button>
+      </div>
+
+      {/* 好感度进度条 — 精致胶囊款 */}
+      <div className="px-5 py-2 z-10 relative">
+        <div className="flex items-center justify-between text-xs text-pink-500/70 mb-1.5">
+          <span className="font-medium">好感度</span>
+          <span className={cn(
+            "font-bold text-pink-500 tabular-nums",
+            animateDirection === "up" && "text-green-500 animate-bounce-in",
+            animateDirection === "down" && "text-red-500 animate-pulse"
+          )}>
+            {score} / 80
+          </span>
+        </div>
+        <div className={cn(
+          "affinity-bar",
+          animateDirection === "up" && "animate-score-up",
+          animateDirection === "down" && "animate-score-down"
+        )}>
+          <div
+            className="affinity-fill"
+            style={{
+              width: `${Math.max(0, Math.min(100, ((score + 50) / 130) * 100))}%`,
+            }}
+          />
+        </div>
+        <div className="flex justify-between text-[10px] text-pink-300 mt-1">
+          <span>−50</span>
+          <span>0</span>
+          <span>50</span>
+          <span>100</span>
+        </div>
       </div>
 
       {/* 聊天区域 */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-3 py-3 scrollbar-hide"
+        className="flex-1 overflow-y-auto px-4 py-3 pretty-scroll relative z-10"
       >
-        {/* 好感度 + 轮次 系统消息（微信风格） */}
+        {/* 轮次提示 */}
         <div className="flex justify-center mb-4">
-          <div className={cn(
-            "wechat-sys-msg flex items-center gap-1.5 transition-all duration-500",
-            animateDirection === "up" && "bg-green-500/25 text-green-50",
-            animateDirection === "down" && "bg-red-500/25 text-red-50",
-          )}>
-            <span>第 {Math.min(round, TOTAL_ROUNDS)} / {TOTAL_ROUNDS} 轮</span>
-            <span className="text-white/40">·</span>
-            <span className={cn("font-medium", 
-              animateDirection === "up" && "animate-bounce-in",
-              animateDirection === "down" && "animate-pulse"
-            )}>
-              ❤️ {score}
-            </span>
-            <span className="text-white/40">·</span>
-            <span>目标 80</span>
+          <div className="system-msg">
+            第 {Math.min(round, TOTAL_ROUNDS)} / {TOTAL_ROUNDS} 轮
           </div>
         </div>
 
-        {messages.map((msg, idx) => (
-          <ChatBubble
-            key={msg.id}
-            message={msg}
-            gender={gender}
-            isLatest={idx === messages.length - 1}
-          />
+        {messages.map((msg) => (
+          <div key={msg.id} className="mb-4">
+            <ChatBubble message={msg} />
+          </div>
         ))}
 
-        {isLoading && <TypingBubble gender={gender} />}
+        {isLoading && (
+          <div className="mb-4">
+            <ChatBubble
+              message={{
+                id: "typing",
+                role: "partner",
+                text: "",
+                scoreChange: 0,
+                round,
+              }}
+              isTyping={true}
+            />
+          </div>
+        )}
 
         {error && (
-          <div className="flex justify-center my-4">
-            <div className="bg-red-50 text-red-500 text-sm px-4 py-2 rounded-lg">
+          <div className="flex justify-center my-4 animate-fade-in">
+            <div className="bg-red-50/80 backdrop-blur-sm text-red-500 text-sm px-4 py-2.5 rounded-xl border border-red-100 shadow-sm">
               {error}
               <button
                 onClick={retryRound}
-                className="ml-2 underline font-medium"
+                className="ml-2 underline font-medium hover:text-red-600"
               >
                 重试
               </button>
@@ -429,29 +468,30 @@ export function GameApp() {
         )}
       </div>
 
-      {/* 底部区域 - 精致微信输入框风格 */}
+      {/* 底部区域 — 玻璃拟态输入栏 */}
       {(phase === "playing" || phase === "won" || phase === "lost") &&
         currentOptions.length > 0 && (
-          <div className="wechat-input-bar">
-            {/* 工具栏一行 */}
-            <div className="flex items-center px-3 py-2 gap-2">
-              <button className="p-1.5 text-gray-500 btn-press hover:text-gray-700">
-                <svg className="w-[26px] h-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <div className="glass-input relative z-10">
+            {/* 输入框提示行 */}
+            <div className="flex items-center px-4 pt-3 pb-2 gap-2">
+              <button className="p-1.5 text-pink-400 hover:text-pink-500 transition-colors">
+                <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
                   <path d="M12 2v10m0 0l-3-3m3 3l3-3M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <div className="flex-1 wechat-input h-9 px-3 flex items-center text-gray-400 text-[14px]">
-                <span className="truncate">选择回复内容…</span>
+              <div className="flex-1 input-field h-10 px-4 flex items-center text-pink-300 text-sm">
+                <span className="truncate">选择下方回复，看看对方反应…</span>
               </div>
-              <button className="p-1.5 text-gray-500 btn-press hover:text-gray-700">
-                <svg className="w-[26px] h-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                  <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+              <button className="p-1.5 text-pink-400 hover:text-pink-500 transition-colors">
+                <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M8 12h8M12 8v8" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
 
             {/* 选项 / 结束面板 */}
-            <div className="px-3 pt-1 pb-3 pb-safe">
+            <div className="px-4 pb-4 pt-1">
               {phase === "playing" && (
                 <OptionButtons
                   options={currentOptions}
@@ -460,7 +500,6 @@ export function GameApp() {
                     handleSelectOption(opt, idx);
                   }}
                   disabled={isLoading}
-                  selectedIndex={selectedOption}
                 />
               )}
 

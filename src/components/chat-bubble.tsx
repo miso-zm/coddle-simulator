@@ -1,173 +1,106 @@
 "use client";
 
-import { Avatar } from "./avatar";
+import { useEffect, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
 
 interface ChatBubbleProps {
   message: ChatMessage;
-  gender: "girlfriend" | "boyfriend" | null;
-  isLatest?: boolean;
+  isTyping?: boolean;
 }
 
-export function ChatBubble({ message, gender, isLatest }: ChatBubbleProps) {
-  const isPartner = message.role === "partner";
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+export function ChatBubble({ message, isTyping = false }: ChatBubbleProps) {
+  const isMe = message.role === "user";
   const [displayedText, setDisplayedText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
 
-  // 打字机效果（对方消息）
   useEffect(() => {
-    if (!isPartner) {
+    if (isTyping) return;
+    if (message.role === "user") {
       setDisplayedText(message.text);
+      setIsComplete(true);
       return;
     }
 
-    // 已显示过的不再重新打
-    if (displayedText.length >= message.text.length) return;
-
-    let i = displayedText.length;
+    let i = 0;
     const text = message.text;
+    const speed = Math.max(15, Math.floor(600 / text.length));
+
     const timer = setInterval(() => {
-      i += 1;
-      setDisplayedText(text.slice(0, i));
-      if (i >= text.length) {
+      if (i < text.length) {
+        setDisplayedText(text.slice(0, i + 1));
+        i++;
+      } else {
+        setIsComplete(true);
         clearInterval(timer);
       }
-    }, 25);
+    }, speed);
 
     return () => clearInterval(timer);
-  }, [message.text, isPartner]);
+  }, [message.text, message.role, isTyping]);
 
-  const togglePlay = () => {
-    if (!audioRef.current || !message.audioUri) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => setIsPlaying(false);
-    audio.addEventListener("ended", handleEnded);
-    return () => audio.removeEventListener("ended", handleEnded);
-  }, [message.audioUri]);
-
-  const isTyping = isPartner && displayedText.length === 0 && isLatest;
+  if (isTyping) {
+    return (
+      <div className="flex items-start gap-2 animate-bubble-in">
+        {/* 头像占位，与上方头像对齐 */}
+        <div className="w-9 h-9 flex-shrink-0 opacity-0" />
+        <div className="bubble-other px-4 py-3 flex items-center gap-1">
+          <span className="typing-dot w-1.5 h-1.5 rounded-full" />
+          <span className="typing-dot w-1.5 h-1.5 rounded-full" />
+          <span className="typing-dot w-1.5 h-1.5 rounded-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={cn(
-        "flex gap-2 mb-3 animate-bubble-in",
-        isPartner ? "justify-start" : "justify-end",
-      )}
-    >
-      {/* 头像 - 左侧（对方）或右侧（用户） */}
-      {isPartner && <Avatar role="partner" gender={gender} size="sm" />}
-      {!isPartner && <Avatar role="user" gender={gender} size="sm" />}
-
-      <div className="max-w-[72%]">
-        <div
-          className={cn(
-            "relative px-3.5 py-2.5 text-[15px] leading-relaxed rounded-[14px]",
-            isPartner
-              ? "bg-white text-gray-800 bubble-left-wechat bubble-shine-left"
-              : "bg-[#95EC69] text-[#1a1a1a] bubble-right-wechat bubble-shine-right",
-          )}
-        >
-          {isTyping ? (
-            <div className="flex items-center gap-1 px-1 py-1">
-              <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
-              <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
-              <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
-            </div>
-          ) : (
-            <div className="whitespace-pre-wrap break-words">
-              {isPartner ? displayedText : message.text}
-              {/* 打字光标 */}
-              {isLatest && isPartner && displayedText.length < message.text.length && (
-                <span className="inline-block w-[2px] h-4 bg-gray-500/50 ml-0.5 animate-pulse align-[-3px]" />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* 语音播放按钮（对方消息才有） */}
-        {!isTyping && isPartner && message.audioUri && (
-          <button
-            onClick={togglePlay}
-            className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 transition-colors btn-press"
-          >
-            {isPlaying ? (
-              <>
-                <span className="flex items-end gap-0.5 h-3">
-                  <span className="w-[2px] h-2 bg-gray-400 animate-pulse" style={{animationDelay: '0s'}} />
-                  <span className="w-[2px] h-3 bg-gray-400 animate-pulse" style={{animationDelay: '0.15s'}} />
-                  <span className="w-[2px] h-2 bg-gray-400 animate-pulse" style={{animationDelay: '0.3s'}} />
-                </span>
-                <span>播放中</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                <span>语音</span>
-              </>
-            )}
-            <audio ref={audioRef} src={message.audioUri} preload="none" />
-          </button>
-        )}
-
-        {/* 好感度变化提示（对方消息才有） */}
-        {!isTyping && isPartner &&
-          message.scoreChange !== undefined &&
-          message.scoreChange !== 0 && (
-            <div
-              className={cn(
-                "mt-1 text-xs font-semibold",
-                message.scoreChange > 0
-                  ? "text-green-500 animate-score-up"
-                  : "text-red-500 animate-score-down",
-              )}
-            >
-              {message.scoreChange > 0 ? "↑ +" : "↓ "}
-              {message.scoreChange}
-            </div>
-          )}
-
-        {/* 沟通小贴士解析（对方消息才有） */}
-        {!isTyping && isPartner && message.analysis && (
-          <div className="analysis-card mt-2 px-3 py-2 text-[13px] text-amber-800 leading-relaxed animate-fade-in">
-            <span className="font-medium">💡 沟通小贴士：</span>
-            {message.analysis}
+    <div className="flex flex-col gap-2 animate-bubble-in">
+      {/* 气泡行 */}
+      <div className={`flex items-start gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
+        <div className={`w-9 h-9 flex-shrink-0 rounded-full overflow-hidden ${isMe ? "bg-gradient-to-br from-pink-400 to-rose-500" : "bg-gradient-to-br from-pink-200 to-pink-300"}`}>
+          {/* 简化头像 */}
+          <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold">
+            {isMe ? "我" : "TA"}
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// 正在输入的气泡组件
-export function TypingBubble({ gender }: { gender: "girlfriend" | "boyfriend" | null }) {
-  return (
-    <div className="flex gap-2 mb-3 animate-bubble-in">
-      <Avatar role="partner" gender={gender} size="sm" />
-      <div className="bg-white rounded-[14px] px-3.5 py-2.5 bubble-left-wechat bubble-shine-left">
-        <div className="flex items-center gap-1">
-          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
-          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
-          <span className="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full" />
+        </div>
+        <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1.5`}>
+          <div className={`${isMe ? "bubble-me" : "bubble-other"} px-4 py-2.5 text-[15px] leading-relaxed`}>
+            <p className={isMe ? "text-white" : "text-gray-800"}>{displayedText}</p>
+            {!isComplete && message.role !== "user" && (
+              <span className="inline-block w-0.5 h-4 bg-pink-400 ml-0.5 align-middle animate-pulse" />
+            )}
+          </div>
+          {/* 语音播放按钮（仅对方消息） */}
+          {!isMe && message.audioUri && isComplete && (
+            <button
+              onClick={() => {
+                const audio = new Audio(message.audioUri!);
+                audio.play().catch(() => {});
+              }}
+              className="voice-btn"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              听语音
+            </button>
+          )}
         </div>
       </div>
+
+      {/* 沟通小贴士 — 在对方气泡下方展示 */}
+      {!isMe && message.analysis && isComplete && (
+        <div className="ml-11 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className={`tip-card p-3 text-xs leading-relaxed max-w-[85%] ${
+            message.scoreChange && message.scoreChange > 0 ? "tip-card-green text-green-700" : "text-amber-700"
+          }`}>
+            <div className="font-semibold mb-1 flex items-center gap-1 relative z-10">
+              <span>💡</span>
+              <span>{message.scoreChange && message.scoreChange > 0 ? "加分原因" : "踩雷了哦"}</span>
+            </div>
+            <p className="relative z-10">{message.analysis}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,47 +1,40 @@
 "use client";
 
 import type { ChatOption } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface OptionButtonsProps {
   options: ChatOption[];
   onSelect: (option: ChatOption) => void;
   disabled?: boolean;
-  selectedIndex?: number | null;
 }
 
-export function OptionButtons({
-  options,
-  onSelect,
-  disabled = false,
-  selectedIndex = null,
-}: OptionButtonsProps) {
+export function OptionButtons({ options, onSelect, disabled }: OptionButtonsProps) {
   return (
-    <div className="flex flex-col gap-2">
-      {options.map((option, index) => {
-        const isSelected = selectedIndex === index;
-        const isDisabled = disabled && !isSelected;
-
-        return (
-          <button
-            key={index}
-            onClick={() => !disabled && onSelect(option)}
-            disabled={disabled}
-            className={cn(
-              "quick-reply-bubble w-full text-left px-4 py-2.5 text-[14.5px] leading-relaxed text-gray-800",
-              "transition-all duration-200 ease-out",
-              isSelected && "bg-white ring-2 ring-pink-300/50 scale-[0.99]",
-              isDisabled && "opacity-50 cursor-not-allowed",
-            )}
-            style={{ animationDelay: `${index * 40}ms` }}
+    <div className="flex flex-col gap-2 w-full">
+      {options.map((option, index) => (
+        <button
+          key={`${option.text}-${index}`}
+          onClick={() => onSelect(option)}
+          disabled={disabled}
+          className="option-btn w-full px-4 py-3 text-left flex items-center gap-3 text-[15px] leading-snug text-gray-700 hover:text-pink-600 group"
+        >
+          <span className="option-number">{index + 1}</span>
+          <span className="flex-1 font-medium">{option.text}</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-pink-300 group-hover:text-pink-500 transition-colors opacity-0 group-hover:opacity-100"
           >
-            <span className="text-pink-400 font-medium mr-2 text-[13px]">
-              {index + 1}
-            </span>
-            {option.text}
-          </button>
-        );
-      })}
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      ))}
     </div>
   );
 }
