@@ -16,7 +16,8 @@ export function OptionButtons({ options, onSelect, disabled }: OptionButtonsProp
           key={`${option.text}-${index}`}
           onClick={() => onSelect(option)}
           disabled={disabled}
-          className="option-btn w-full px-4 py-3 text-left flex items-center gap-3 text-[15px] leading-snug text-gray-700 hover:text-pink-600 group"
+          className="option-btn w-full px-4 py-3 text-left flex items-center gap-3 text-[15px] leading-snug text-gray-700 hover:text-pink-600 group animate-option-in"
+          style={{ animationDelay: `${index * 0.07}s` }}
         >
           <span className="option-number">{index + 1}</span>
           <span className="flex-1 font-medium">{option.text}</span>
@@ -29,7 +30,7 @@ export function OptionButtons({ options, onSelect, disabled }: OptionButtonsProp
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-pink-300 group-hover:text-pink-500 transition-colors opacity-0 group-hover:opacity-100"
+            className="text-pink-300 group-hover:text-pink-500 group-hover:translate-x-0.5 transition-all opacity-70 group-hover:opacity-100"
           >
             <path d="M9 18l6-6-6-6" />
           </svg>

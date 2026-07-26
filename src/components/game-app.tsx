@@ -803,28 +803,44 @@ function SceneSelectScreen({
             key={scene.id}
             onClick={() => onSelect(scene)}
             className={cn(
-              "w-full text-left p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 btn-press",
+              "scene-card relative w-full text-left",
+              "bg-white rounded-2xl overflow-hidden",
               "border border-gray-100 hover:border-pink-200",
-              "animate-fade-in",
+              "shadow-sm hover:shadow-lg hover:shadow-pink-100/50",
+              "transform hover:-translate-y-0.5 active:translate-y-0",
+              "transition-all duration-300 ease-out",
+              "animate-fade-slide-up",
             )}
-            style={{ animationDelay: `${index * 50}ms` }}
+            style={{ animationDelay: `${index * 80}ms` }}
           >
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">{scene.emoji}</span>
+            {/* 左侧色条 */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-pink-400 to-orange-400 rounded-l-2xl" />
+            
+            <div className="flex items-start gap-3 p-4 pl-5">
+              <div className="relative flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-100 to-orange-100 flex items-center justify-center text-2xl">
+                  {scene.emoji}
+                </div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white shadow-sm flex items-center justify-center text-[10px] font-bold text-pink-500 border border-pink-100">
+                  {index + 1}
+                </div>
+              </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-800 mb-1">{scene.title}</h3>
-                <p className="text-sm text-gray-500 line-clamp-2">
+                <h3 className="font-semibold text-gray-800 mb-1 text-[15px]">{scene.title}</h3>
+                <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
                   {scene.shortDesc}
                 </p>
               </div>
-              <svg
-                className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-pink-50 transition-colors">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </button>
         ))}
