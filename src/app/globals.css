@@ -72,22 +72,35 @@
   background: #FFFFFF;
   box-shadow: 
     0 2px 8px rgba(255, 107, 157, 0.08),
-    0 8px 24px rgba(255, 107, 157, 0.06),
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
-  border-radius: 8px 20px 20px 20px;
+    0 8px 24px rgba(255, 107, 157, 0.06);
+  border-radius: 4px 18px 18px 18px;
   position: relative;
+  word-break: break-word;
 }
 
+/* 气泡尾巴 - 用 border 三角形实现无缝衔接 */
 .bubble-other::before {
   content: '';
   position: absolute;
-  left: -8px;
-  top: 0;
-  width: 12px;
-  height: 12px;
-  background: #FFFFFF;
-  clip-path: polygon(100% 0, 0 0, 100% 100%);
-  box-shadow: 0 2px 4px rgba(255, 107, 157, 0.04);
+  left: -10px;
+  top: 6px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid #FFFFFF;
+  border-left: 10px solid transparent;
+}
+
+/* 尾巴阴影 - 叠一层做阴影过渡 */
+.bubble-other::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 7px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid rgba(255, 107, 157, 0.04);
+  border-left: 9px solid transparent;
+  z-index: -1;
 }
 
 /* 我方气泡 */
@@ -95,22 +108,35 @@
   background: linear-gradient(135deg, #FF8FAB 0%, #FF6B9D 100%);
   box-shadow: 
     0 2px 8px rgba(255, 107, 157, 0.25),
-    0 8px 24px rgba(255, 107, 157, 0.18),
-    0 1px 0 rgba(255, 255, 255, 0.2) inset;
-  border-radius: 20px 8px 20px 20px;
+    0 8px 24px rgba(255, 107, 157, 0.18);
+  border-radius: 18px 4px 18px 18px;
   color: white;
   position: relative;
+  word-break: break-word;
 }
 
 .bubble-me::before {
   content: '';
   position: absolute;
-  right: -8px;
-  top: 0;
-  width: 12px;
-  height: 12px;
-  background: linear-gradient(135deg, #FF8FAB 0%, #FF6B9D 100%);
-  clip-path: polygon(0 0, 100% 0, 0 100%);
+  right: -10px;
+  top: 6px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid #FF8AA6;
+  border-right: 10px solid transparent;
+}
+
+/* 我方气泡尾巴阴影 */
+.bubble-me::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 7px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid rgba(255, 107, 157, 0.12);
+  border-right: 9px solid transparent;
+  z-index: -1;
 }
 
 /* ====== 打字机点点 ====== */
