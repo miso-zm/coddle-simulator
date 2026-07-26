@@ -170,6 +170,19 @@
   display: none;
 }
 
+/* 心跳动画 */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.12); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  60% { transform: scale(1); }
+}
+.animate-heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
 /* 微信气泡尾巴 */
 .bubble-left-wechat::before {
   content: '';

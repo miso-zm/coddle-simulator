@@ -508,7 +508,29 @@ function HomeScreen({
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-gradient-to-b from-pink-50 via-white to-orange-50 animate-fade-in">
       {/* Logo 和标题 */}
       <div className="text-center mb-10">
-        <div className="text-6xl mb-4">💕</div>
+        <div className="relative inline-block mb-4">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-heartbeat">
+            <defs>
+              <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FF6B9D" />
+                <stop offset="100%" stopColor="#FF8C42" />
+              </linearGradient>
+              <filter id="heartShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#FF6B9D" floodOpacity="0.3" />
+              </filter>
+            </defs>
+            <path
+              d="M40 68C40 68 12 48 12 30C12 18 21 10 30 10C34.5 10 38 12 40 15C42 12 45.5 10 50 10C59 10 68 18 68 30C68 48 40 68 40 68Z"
+              fill="url(#heartGrad)"
+              filter="url(#heartShadow)"
+            />
+            <path
+              d="M26 22C29 20 33 21 35 24C35.5 24.8 35 26 34.2 26.5C33.4 27 32.2 26.7 31.8 25.8C30.5 24 28 23.5 26.5 24.5C25.8 25 24.8 24.7 24.5 24C23.8 22.5 24.5 20.5 26 22Z"
+              fill="white"
+              fillOpacity="0.6"
+            />
+          </svg>
+        </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
           哄哄模拟器
         </h1>
