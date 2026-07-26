@@ -70,19 +70,26 @@ export function ChatBubble({ message, isTyping = false }: ChatBubbleProps) {
             )}
           </div>
           {/* 语音播放按钮（仅对方消息） */}
-          {!isMe && message.audioUri && isComplete && (
-            <button
-              onClick={() => {
-                const audio = new Audio(message.audioUri!);
-                audio.play().catch(() => {});
-              }}
-              className="voice-btn"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              听语音
-            </button>
+          {!isMe && isComplete && (
+            message.audioUri ? (
+              <button
+                onClick={() => {
+                  const audio = new Audio(message.audioUri!);
+                  audio.play().catch(() => {});
+                }}
+                className="voice-btn"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                听语音
+              </button>
+            ) : (
+              <span className="text-[11px] text-gray-400 flex items-center gap-1 mt-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-300 animate-pulse" />
+                语音生成中…
+              </span>
+            )
           )}
         </div>
       </div>

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LLMClient, Config, HeaderUtils, TTSClient } from "coze-coding-dev-sdk";
+import { LLMClient, Config, HeaderUtils } from "coze-coding-dev-sdk";
 import { z } from "zod";
 import { buildSystemPrompt, buildUserMessage, buildFirstRoundMessage, parseLLMResponse, shuffleOptions } from "@/lib/prompt";
-import { getVoiceById, MAX_RETRIES, SCENES } from "@/lib/constants";
+import { MAX_RETRIES, SCENES } from "@/lib/constants";
 import type { Gender, VoiceType } from "@/lib/types";
 
 const requestSchema = z.object({
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
         ];
 
         const response = await llmClient.invoke(messages, {
-          model: "doubao-seed-2-0-lite-260215",
-          temperature: 1.2,
+          model: "doubao-seed-2-0-mini-260215",
+          temperature: 0.9,
         });
 
         const parsedResponse = parseLLMResponse(response.content);
@@ -103,32 +103,12 @@ export async function POST(request: NextRequest) {
     // 打乱选项顺序
     const shuffledOptions = shuffleOptions(result.options);
 
-    // 生成 TTS 语音
-    let audioUri: string | undefined;
-    if (generateAudio) {
-      try {
-        const ttsClient = new TTSClient(config, customHeaders);
-        const voiceConfig = getVoiceById(voice as VoiceType);
-        const ttsResponse = await ttsClient.synthesize({
-          uid: "honghong_player",
-          text: result.message,
-          speaker: voiceConfig.speakerId,
-          audioFormat: "mp3",
-          sampleRate: 24000,
-        });
-        audioUri = ttsResponse.audioUri;
-      } catch (ttsErr) {
-        // TTS 失败不影响主流程
-        console.warn("TTS generation failed:", ttsErr);
-      }
-    }
-
+    // TTS 语音改为前端单独调用 /api/tts 获取，这里不等，加快首字响应
     return NextResponse.json({
       message: result.message,
       scoreChange: result.scoreChange,
       selectedAnalysis: result.selectedAnalysis || "",
       options: shuffledOptions,
-      audioUri,
     });
   } catch (error) {
     console.error("Chat API error:", error);

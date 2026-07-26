@@ -79,6 +79,27 @@ export function GameApp() {
     setTimeout(() => setAnimateDirection(null), 700);
   }, []);
 
+  // 异步获取语音并更新指定消息的 audioUri（不阻塞 UI）
+  const fetchAudioForMessage = useCallback(async (messageId: string, text: string) => {
+    if (!voice || !text) return;
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.audioUri) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? { ...m, audioUri: data.audioUri } : m)),
+        );
+      }
+    } catch {
+      // 语音失败不影响主流程
+    }
+  }, [voice]);
+
   // 生成第一轮对话
   const startGame = useCallback(
     async (selectedScene: Scene) => {
@@ -122,11 +143,14 @@ export function GameApp() {
           text: data.message,
           round: 1,
           scoreChange: 0,
-          audioUri: data.audioUri,
+          audioUri: undefined,
         };
 
         setMessages([firstMessage]);
         setCurrentOptions(data.options);
+
+        // 后台异步生成语音，不阻塞显示
+        fetchAudioForMessage(firstMessage.id, data.message);
       } catch (err) {
         setError(err instanceof Error ? err.message : "加载失败，请重试");
       } finally {
@@ -201,11 +225,14 @@ export function GameApp() {
           text: data.message,
           round: round + 1,
           scoreChange: data.scoreChange,
-          audioUri: data.audioUri,
+          audioUri: undefined,
           analysis: data.selectedAnalysis || "",
         };
 
         setMessages((prev) => [...prev, partnerMessage]);
+
+        // 后台异步生成语音，不阻塞 UI
+        fetchAudioForMessage(partnerMsgId, data.message);
 
         // 更新历史记录
         setHistory((prev) => [
