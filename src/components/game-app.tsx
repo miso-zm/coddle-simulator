@@ -353,26 +353,27 @@ export function GameApp() {
 
   // 游戏中 / 结束
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#EDEDED] relative overflow-hidden wechat-bg">
-      {/* 顶部导航栏 - 微信风格 */}
-      <div className="flex items-center justify-between px-3 py-2.5 bg-[#EDEDED] border-b border-gray-200/70 z-10">
+    <div className="flex flex-col h-screen max-w-md mx-auto bg-[#EDEDED] relative overflow-hidden wechat-bg md:shadow-2xl md:my-4 md:rounded-2xl md:h-[calc(100vh-2rem)] md:border md:border-gray-200/50">
+      {/* 顶部导航栏 - 精致微信风格 */}
+      <div className="wechat-nav flex items-center justify-between px-4 py-2.5 z-20">
         <button
           onClick={backToScenes}
-          className="text-gray-700 hover:text-gray-900 p-1 -ml-1 btn-press flex items-center gap-0.5"
+          className="flex items-center gap-0.5 text-gray-700 hover:text-gray-900 p-1 -ml-1.5 btn-press"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="text-[15px]">返回</span>
         </button>
-        <div className="text-[16px] font-medium text-gray-900">
-          {scene?.title}
+        <div className="flex flex-col items-center">
+          <div className="text-[15px] font-semibold text-gray-900 tracking-tight">
+            {scene?.title}
+          </div>
         </div>
-        <button className="text-gray-700 p-1 -mr-1 btn-press">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="1.8" />
-            <circle cx="12" cy="12" r="1.8" />
-            <circle cx="19" cy="12" r="1.8" />
+        <button className="p-1 -mr-1.5 text-gray-700 btn-press">
+          <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="1.7" />
+            <circle cx="12" cy="12" r="1.7" />
+            <circle cx="19" cy="12" r="1.7" />
           </svg>
         </button>
       </div>
@@ -382,17 +383,22 @@ export function GameApp() {
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-3 py-3 scrollbar-hide"
       >
-        {/* 好感度系统提示（嵌在对话中，像微信的系统提示） */}
-        <div className="flex justify-center mb-3">
+        {/* 好感度 + 轮次 系统消息（微信风格） */}
+        <div className="flex justify-center mb-4">
           <div className={cn(
-            "bg-black/10 text-white/90 text-[11px] px-3 py-1 rounded-md backdrop-blur-sm transition-all duration-300",
-            animateDirection === "up" && "bg-green-500/30",
-            animateDirection === "down" && "bg-red-500/30",
+            "wechat-sys-msg flex items-center gap-1.5 transition-all duration-500",
+            animateDirection === "up" && "bg-green-500/25 text-green-50",
+            animateDirection === "down" && "bg-red-500/25 text-red-50",
           )}>
-            <span className="mr-1">💬 第 {Math.min(round, TOTAL_ROUNDS)} 轮 / 共 {TOTAL_ROUNDS} 轮</span>
-            <span className="mx-1 text-white/50">·</span>
-            <span>好感度 {score}</span>
-            <span className="mx-1 text-white/50">·</span>
+            <span>第 {Math.min(round, TOTAL_ROUNDS)} / {TOTAL_ROUNDS} 轮</span>
+            <span className="text-white/40">·</span>
+            <span className={cn("font-medium", 
+              animateDirection === "up" && "animate-bounce-in",
+              animateDirection === "down" && "animate-pulse"
+            )}>
+              ❤️ {score}
+            </span>
+            <span className="text-white/40">·</span>
             <span>目标 80</span>
           </div>
         </div>
@@ -423,24 +429,23 @@ export function GameApp() {
         )}
       </div>
 
-      {/* 底部区域 - 微信输入框风格 */}
+      {/* 底部区域 - 精致微信输入框风格 */}
       {(phase === "playing" || phase === "won" || phase === "lost") &&
         currentOptions.length > 0 && (
-          <div className="bg-[#F7F7F7] border-t border-gray-200/70">
+          <div className="wechat-input-bar">
             {/* 工具栏一行 */}
-            <div className="flex items-center px-2 py-1.5 gap-2">
-              <button className="p-1.5 text-gray-500 btn-press">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                  <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+            <div className="flex items-center px-3 py-2 gap-2">
+              <button className="p-1.5 text-gray-500 btn-press hover:text-gray-700">
+                <svg className="w-[26px] h-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path d="M12 2v10m0 0l-3-3m3 3l3-3M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <div className="flex-1 h-9 bg-white rounded-lg px-3 flex items-center text-gray-400 text-sm">
-                选择下方回复内容
+              <div className="flex-1 wechat-input h-9 px-3 flex items-center text-gray-400 text-[14px]">
+                <span className="truncate">选择回复内容…</span>
               </div>
-              <button className="p-1.5 text-gray-500 btn-press">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                  <rect x="4" y="4" width="16" height="16" rx="3" />
-                  <path d="M4 8h16M8 4v16" strokeLinecap="round" />
+              <button className="p-1.5 text-gray-500 btn-press hover:text-gray-700">
+                <svg className="w-[26px] h-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
