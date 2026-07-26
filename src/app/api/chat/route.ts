@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: result.message,
       scoreChange: result.scoreChange,
+      selectedAnalysis: result.selectedAnalysis || "",
       options: shuffledOptions,
       audioUri,
     });

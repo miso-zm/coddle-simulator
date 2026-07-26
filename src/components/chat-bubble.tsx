@@ -110,6 +110,14 @@ export function ChatBubble({ message, gender, isLatest }: ChatBubbleProps) {
               {Math.abs(message.scoreChange)}
             </div>
           )}
+
+        {/* 沟通小贴士解析（对方消息才有） */}
+        {isPartner && message.analysis && (
+          <div className="mt-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg text-[13px] text-amber-700 leading-relaxed animate-fade-in">
+            <span className="font-medium">💡 沟通小贴士：</span>
+            {message.analysis}
+          </div>
+        )}
       </div>
 
       {isPartner && isLatest && (

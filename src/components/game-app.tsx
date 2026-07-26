@@ -145,13 +145,14 @@ export function GameApp() {
       setIsLoading(true);
       setError(null);
 
-      // 添加用户消息
+      // 添加用户消息（带上选项解析）
       const userMsgId = `user-${Date.now()}`;
       const userMessage: ChatMessage = {
         id: userMsgId,
         role: "user",
         text: option.text,
         round,
+        optionAnalysis: option.analysis,
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -201,6 +202,7 @@ export function GameApp() {
           round: round + 1,
           scoreChange: data.scoreChange,
           audioUri: data.audioUri,
+          analysis: data.selectedAnalysis || "",
         };
 
         setMessages((prev) => [...prev, partnerMessage]);
@@ -534,8 +536,8 @@ function HomeScreen({
         <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
           哄哄模拟器
         </h1>
-        <p className="text-gray-500 text-sm">
-          你能在10轮内哄好生气的TA吗？
+        <p className="text-gray-500 text-sm leading-relaxed max-w-[260px] text-center">
+          学一点高情商沟通，哄好生气的TA
         </p>
       </div>
 
@@ -561,7 +563,7 @@ function HomeScreen({
         onClick={onStart}
         className="w-full max-w-sm py-4 bg-gradient-to-r from-pink-500 to-orange-400 text-white text-lg font-semibold rounded-2xl shadow-lg shadow-pink-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 btn-press"
       >
-        开始游戏
+        开始练习
       </button>
 
       {/* 次级按钮 */}
