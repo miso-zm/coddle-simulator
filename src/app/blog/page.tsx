@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { getAllBlogPosts } from "@/lib/blog-posts";
+import { getAllBlogPosts } from "@/storage/database/blog-repo";
 import { Heart, ArrowLeft, Clock } from "lucide-react";
+import { GeneratePostButton } from "./generate-button";
 
-export default function BlogListPage() {
-  const posts = getAllBlogPosts();
+export const dynamic = 'force-dynamic';
+
+export default async function BlogListPage() {
+  const posts = await getAllBlogPosts();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-orange-50">
@@ -23,6 +26,7 @@ export default function BlogListPage() {
             </h1>
             <p className="text-xs text-gray-500">学点小技巧，谈场甜甜的恋爱</p>
           </div>
+          <GeneratePostButton />
         </div>
       </div>
 
@@ -30,7 +34,7 @@ export default function BlogListPage() {
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         {posts.map((post, index) => (
           <Link
-            key={post.slug}
+            key={post.id}
             href={`/blog/${post.slug}`}
             className="block animate-fade-slide-up"
             style={{ animationDelay: `${index * 80}ms` }}
@@ -39,7 +43,7 @@ export default function BlogListPage() {
               <div className="flex gap-4">
                 {/* 左侧大图标 */}
                 <div className="shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-pink-100 to-orange-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
-                  {post.coverEmoji}
+                  {post.emoji}
                 </div>
                 {/* 右侧内容 */}
                 <div className="flex-1 min-w-0">
@@ -51,7 +55,7 @@ export default function BlogListPage() {
                   </p>
                   <div className="flex items-center gap-2 text-xs text-gray-400">
                     <Clock className="w-3 h-3" />
-                    <span>{post.readTime} 分钟阅读</span>
+                    <span>{post.read_time} 分钟阅读</span>
                     <span className="text-pink-200">·</span>
                     <span className="text-pink-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-0.5">
                       阅读全文

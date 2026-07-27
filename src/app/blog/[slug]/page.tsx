@@ -1,44 +1,18 @@
-"use client";
-
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, Heart, Home, Share2 } from "lucide-react";
-import { getAllBlogPosts, getBlogPost } from "@/lib/blog-posts";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Clock, Heart } from "lucide-react";
+import { getBlogPostBySlug } from "@/storage/database/blog-repo";
+import { ShareButton } from "./share-button";
 
-export default function BlogDetailPage() {
-  const params = useParams<{ slug: string }>();
-  const router = useRouter();
-  const post = getBlogPost(params.slug);
+export const dynamic = 'force-dynamic';
+
+export default async function BlogDetailPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-orange-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 mb-4">文章不存在</p>
-          <Link
-            href="/blog"
-            className="text-pink-500 hover:text-pink-600 font-medium"
-          >
-            返回列表
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: post.title, text: post.summary });
-      } catch {
-        // 用户取消分享
-      }
-    } else {
-      // 复制链接
-      await navigator.clipboard.writeText(window.location.href);
-      alert("链接已复制到剪贴板~");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-orange-50">
@@ -57,15 +31,10 @@ export default function BlogDetailPage() {
             </h1>
             <p className="text-xs text-gray-400 flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              {post.readTime} 分钟阅读
+              {post.read_time} 分钟阅读
             </p>
           </div>
-          <button
-            className="p-2 rounded-full hover:bg-pink-100/60 transition-all text-gray-500 hover:text-pink-500"
-            onClick={handleShare}
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
+          <ShareButton title={post.title} text={post.summary} />
         </div>
       </div>
 
@@ -85,7 +54,7 @@ export default function BlogDetailPage() {
 
         {/* 封面 emoji */}
         <div className="w-full h-40 rounded-2xl bg-gradient-to-br from-pink-100 via-orange-50 to-pink-100 flex items-center justify-center mb-8 shadow-soft">
-          <span className="text-6xl animate-float">{post.coverEmoji}</span>
+          <span className="text-6xl animate-float">{post.emoji}</span>
         </div>
 
         {/* 正文 */}
@@ -119,8 +88,7 @@ export default function BlogDetailPage() {
             href="/blog"
             className="inline-flex items-center gap-1 text-sm text-pink-500 hover:text-pink-600 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            返回攻略列表
+            ← 回到恋爱攻略列表
           </Link>
         </div>
       </article>

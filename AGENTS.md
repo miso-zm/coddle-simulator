@@ -70,6 +70,18 @@
 - 分数对用户展示（有进度条和具体数值）
 - 加分绿色发光动画，减分红色抖动动画
 
+### 博客模块
+- **列表页** `/blog`：Server Component，从 `blog_posts` 数据库表读取，按创建时间倒序
+- **详情页** `/blog/[slug]`：Server Component，按 `slug` 字段查询单篇文章
+- **AI 生成** `POST /api/blog/generate`：调用 LLM 生成恋爱沟通技巧文章，自动生成 slug 并存入数据库
+- 博客列表页右上角有"AI写新文章"按钮，点击触发生成
+
+### 数据库层
+- 使用 Supabase（通过 `coze-coding-dev-sdk` 内置凭证）
+- **`src/storage/database/supabase-client.ts`**：Supabase 客户端封装（服务端使用，含凭证加载）
+- **`src/storage/database/blog-repo.ts`**：blog_posts 表数据访问层（getAllBlogPosts / getBlogPostBySlug / getBlogPostById / createBlogPost）
+- **`src/storage/database/shared/schema.ts`**：Drizzle schema 定义（`coze-coding-ai db generate-models` 生成）
+
 ## 包管理规范
 
 **仅允许使用 pnpm** 作为包管理器，**严禁使用 npm 或 yarn**。
