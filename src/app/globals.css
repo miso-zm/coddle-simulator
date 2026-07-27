@@ -311,25 +311,6 @@ body {
   border-radius: 16px 16px 0 0;
 }
 
-/* 光泽扫过效果 */
-.option-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255,255,255,0.5) 50%,
-    transparent 100%
-  );
-  transform: skewX(-15deg);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-
 .option-btn:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 
@@ -337,10 +318,6 @@ body {
     0 3px 10px rgba(255, 107, 157, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.9) inset;
   border-color: rgba(255, 107, 157, 0.55);
-}
-
-.option-btn:hover:not(:disabled)::after {
-  left: 120%;
 }
 
 .option-btn:active:not(:disabled) {
