@@ -79,8 +79,19 @@
 ### 数据库层
 - 使用 Supabase（通过 `coze-coding-dev-sdk` 内置凭证）
 - **`src/storage/database/supabase-client.ts`**：Supabase 客户端封装（服务端使用，含凭证加载）
-- **`src/storage/database/blog-repo.ts`**：blog_posts 表数据访问层（getAllBlogPosts / getBlogPostBySlug / getBlogPostById / createBlogPost）
-- **`src/storage/database/shared/schema.ts`**：Drizzle schema 定义（`coze-coding-ai db generate-models` 生成）
+- **`src/storage/database/blog-repo.ts`**：blog_posts 表数据访问层
+- **`src/storage/database/user-repo.ts`**：users 表数据访问层
+- **`src/storage/database/auth.ts`**：认证工具（bcrypt 密码哈希 + JWT + HttpOnly Cookie）
+- **`src/storage/database/shared/schema.ts`**：Drizzle schema 定义
+
+### 用户系统
+- **注册** `POST /api/auth/register`：用户名+密码注册，bcrypt 加密，注册成功自动登录
+- **登录** `POST /api/auth/login`：用户名+密码登录，返回 JWT 存入 HttpOnly Cookie
+- **登出** `POST /api/auth/logout`：清除登录 Cookie
+- **当前用户** `GET /api/auth/me`：获取当前登录用户信息
+- **注册页** `/register`：注册表单页
+- **登录页** `/login`：登录表单页
+- 首页右上角展示用户状态（未登录显示登录/注册按钮，已登录显示用户名+退出）
 
 ## 包管理规范
 
