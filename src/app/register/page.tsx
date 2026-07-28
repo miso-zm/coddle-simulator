@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Heart, ArrowLeft, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,8 +32,8 @@ export default function RegisterPage() {
       const data = await resp.json();
 
       if (data.success) {
-        router.push("/");
-        router.refresh();
+        // 整页跳转确保服务端重新渲染，首屏即显示正确登录状态
+        window.location.href = "/";
       } else {
         setError(data.error || "注册失败");
       }

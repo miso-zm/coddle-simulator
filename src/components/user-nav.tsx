@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { User, LogOut, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LogOut, Loader2 } from "lucide-react";
 
 interface UserInfo {
   id: number;
@@ -11,52 +11,40 @@ interface UserInfo {
   created_at: string;
 }
 
-export function UserNav() {
+interface UserNavProps {
+  initialUser: UserInfo | null;
+}
+
+export function UserNav({ initialUser }: UserNavProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserInfo | null>(initialUser);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
-  const fetchUser = useCallback(async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const resp = await fetch("/api/auth/me", { credentials: "same-origin" });
       const data = await resp.json();
       if (data.success) {
         setUser(data.data);
-      } else {
-        setUser(null);
       }
     } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
+      // ignore
     }
   }, []);
 
-  // 页面加载 & 路径变化时都重新获取用户状态
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser, pathname]);
-
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     setLogoutLoading(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+      });
       setUser(null);
       router.refresh();
     } finally {
       setLogoutLoading(false);
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-2">
-        <Loader2 className="w-4 h-4 text-pink-400 animate-spin" />
-      </div>
-    );
-  }
+  }, [router]);
 
   if (user) {
     return (
