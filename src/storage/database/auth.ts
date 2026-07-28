@@ -49,10 +49,12 @@ export function verifyToken(token: string): { sub: number } | null {
  */
 export async function setAuthCookie(token: string): Promise<void> {
   const cookieStore = await cookies();
+  const isProd = process.env.COZE_PROJECT_ENV === "PROD";
+  // 预览/开发环境也是 HTTPS，SameSite=None 必须配合 Secure 才能在 iframe 中生效
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
     path: "/",
     maxAge: 7 * 24 * 60 * 60, // 7 天
   });
@@ -63,7 +65,13 @@ export async function setAuthCookie(token: string): Promise<void> {
  */
 export async function clearAuthCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+    maxAge: 0,
+  });
 }
 
 /**
