@@ -1,4 +1,4 @@
-import { pgTable, serial, timestamp, unique, varchar, text, integer } from "drizzle-orm/pg-core"
+import { pgTable, serial, timestamp, unique, varchar, text, integer, index, foreignKey } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -28,4 +28,20 @@ export const users = pgTable("users", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 }, (table) => [
 	unique("users_username_key").on(table.username),
+]);
+
+export const gameRecords = pgTable("game_records", {
+	id: serial().primaryKey().notNull(),
+	userId: integer("user_id").notNull(),
+	scenario: varchar({ length: 100 }).notNull(),
+	finalScore: integer("final_score").notNull(),
+	result: varchar({ length: 20 }).notNull(),
+	playedAt: timestamp("played_at", { withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+	index("idx_game_records_user_id").using("btree", table.userId.asc().nullsLast().op("int4_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "game_records_user_id_fkey"
+		}).onDelete("cascade"),
 ]);

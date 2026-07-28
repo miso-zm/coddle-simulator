@@ -48,15 +48,18 @@ export function UserNav({ initialUser }: UserNavProps) {
 
   if (user) {
     return (
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 backdrop-blur border border-pink-100/50">
+      <div className="flex items-center gap-2">
+        <Link
+          href="/profile"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 backdrop-blur border border-pink-100/50 hover:bg-white/90 transition-all"
+        >
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center">
             <span className="text-white text-xs font-bold">
               {user.username.charAt(0).toUpperCase()}
             </span>
           </div>
           <span className="text-sm font-medium text-gray-700">{user.username}</span>
-        </div>
+        </Link>
         <button
           onClick={handleLogout}
           disabled={logoutLoading}

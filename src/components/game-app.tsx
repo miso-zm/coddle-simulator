@@ -55,6 +55,8 @@ export function GameApp() {
   );
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [recordToast, setRecordToast] = useState<string | null>(null);
+  const [hasSavedRecord, setHasSavedRecord] = useState(false);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const preloadPromiseRef = useRef<{
@@ -99,6 +101,45 @@ export function GameApp() {
     if (savedVoice) setVoice(savedVoice);
     if (savedGender) setGender(savedGender);
   }, []);
+
+  // 游戏结束时保存记录到服务器（登录用户）
+  useEffect(() => {
+    if (hasSavedRecord) return;
+    if (phase !== "won" && phase !== "lost") return;
+    if (!scene) return;
+
+    const result = phase === "won" ? "win" : "lose";
+    const currentScene = scene;
+    const currentScore = score;
+
+    async function saveRecord() {
+      try {
+        const res = await fetch("/api/game-records", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            scenario: currentScene.title,
+            finalScore: currentScore,
+            result,
+          }),
+        });
+
+        if (res.status === 401) {
+          setRecordToast("登录后可保存你的游戏记录");
+        } else if (res.ok) {
+          setRecordToast("您的游戏记录已经保存");
+          setHasSavedRecord(true);
+        }
+      } catch {
+        // 静默失败，不影响用户体验
+      } finally {
+        setTimeout(() => setRecordToast(null), 3000);
+      }
+    }
+
+    saveRecord();
+  }, [phase, scene, score, hasSavedRecord]);
 
   // 自动滚动到底部
   useEffect(() => {
@@ -147,6 +188,8 @@ export function GameApp() {
       setMessages([]);
       setCurrentOptions([]);
       setHistory([]);
+      setHasSavedRecord(false);
+      setRecordToast(null);
       setIsLoading(true);
       setError(null);
 
@@ -427,6 +470,14 @@ export function GameApp() {
   // 游戏中 / 结束
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden chat-bg md:shadow-2xl md:my-4 md:rounded-3xl md:h-[calc(100vh-2rem)] md:border md:border-pink-100">
+      {/* 保存记录提示 */}
+      {recordToast && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-slide-down">
+          <div className="bg-gray-900/90 text-white px-5 py-2.5 rounded-full text-sm shadow-xl backdrop-blur-sm">
+            {recordToast}
+          </div>
+        </div>
+      )}
       {/* 顶部导航栏 — 玻璃拟态 */}
       <div className="glass-nav flex items-center justify-between px-4 py-3 z-20 relative">
         <button
