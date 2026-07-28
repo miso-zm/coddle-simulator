@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { User, LogOut, Loader2 } from "lucide-react";
 
 interface UserInfo {
@@ -13,32 +13,36 @@ interface UserInfo {
 
 export function UserNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const resp = await fetch("/api/auth/me");
+      const resp = await fetch("/api/auth/me", { credentials: "same-origin" });
       const data = await resp.json();
-      if (data.success && data.data) {
+      if (data.success) {
         setUser(data.data);
+      } else {
+        setUser(null);
       }
     } catch {
-      // ignore
+      setUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // 页面加载 & 路径变化时都重新获取用户状态
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser, pathname]);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
       setUser(null);
       router.refresh();
     } finally {
