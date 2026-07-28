@@ -695,6 +695,25 @@ function HomeScreen({
         开始练习
       </button>
 
+      {/* 排行榜入口 */}
+      <Link
+        href="/leaderboard"
+        className="w-full max-w-sm mt-5 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-pink-100 hover:border-pink-200 hover:bg-white transition-all duration-200 flex items-center gap-3 group btn-press"
+      >
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+          🏆
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-gray-700 group-hover:text-pink-600 transition-colors">
+            排行榜
+          </p>
+          <p className="text-xs text-gray-400">看看谁是哄人高手</p>
+        </div>
+        <div className="text-gray-300 group-hover:text-pink-400 group-hover:translate-x-0.5 transition-all">
+          →
+        </div>
+      </Link>
+
       {/* 恋爱攻略入口 */}
       <Link
         href="/blog"
