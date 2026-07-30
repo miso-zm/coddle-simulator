@@ -3,7 +3,8 @@ import { LLMClient, Config, HeaderUtils } from "coze-coding-dev-sdk";
 import { z } from "zod";
 import { buildSystemPrompt, buildUserMessage, buildFirstRoundMessage, parseLLMResponse, shuffleOptions } from "@/lib/prompt";
 import { MAX_RETRIES, SCENES } from "@/lib/constants";
-import type { Gender, VoiceType } from "@/lib/types";
+import { buildFallbackChatResponse } from "@/lib/fallback-chat";
+import type { Gender, OptionType, VoiceType } from "@/lib/types";
 
 const requestSchema = z.object({
   gender: z.enum(["girlfriend", "boyfriend"]),
@@ -13,6 +14,7 @@ const requestSchema = z.object({
   totalRounds: z.number().int().min(1).max(20),
   currentScore: z.number().min(-50).max(100),
   userChoice: z.string().optional(),
+  userChoiceType: z.enum(["excellent", "good", "neutral", "bad", "worst"]).optional(),
   history: z.array(
     z.object({
       user: z.string(),
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { gender, voice, sceneId, round, totalRounds, currentScore, userChoice, history, generateAudio } = parsed.data;
+    const { gender, voice, sceneId, round, totalRounds, currentScore, userChoice, userChoiceType, history, generateAudio } = parsed.data;
 
     // 查找场景
     const scene = SCENES.find((s) => s.id === sceneId);
@@ -94,10 +96,21 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result) {
-      return NextResponse.json(
-        { error: lastError?.message || "生成回复失败，请重试" },
-        { status: 500 },
+      console.warn(
+        "Chat provider unavailable, using local fallback:",
+        lastError?.message || "LLM response parsing failed",
       );
+      const fallback = buildFallbackChatResponse({
+        scene,
+        round,
+        currentScore,
+        userChoiceType: userChoiceType as OptionType | undefined,
+      });
+      return NextResponse.json({
+        ...fallback,
+        options: shuffleOptions(fallback.options),
+        fallback: true,
+      });
     }
 
     // 打乱选项顺序
