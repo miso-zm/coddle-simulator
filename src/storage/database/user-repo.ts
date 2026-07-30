@@ -88,5 +88,9 @@ export async function createUser(params: {
      RETURNING id, username, created_at`,
     [params.username, params.passwordHash],
   );
-  return toPublicUser(result.rows[0]);
+  const row = result.rows[0];
+  if (!row) {
+    throw new Error("创建用户失败: 数据库未返回新用户记录");
+  }
+  return toPublicUser(row);
 }
