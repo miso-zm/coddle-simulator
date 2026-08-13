@@ -753,7 +753,7 @@ function HomeScreen({
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-purple-600 mb-2">
+        <h1 className="mb-2 bg-gradient-to-r from-pink-600 via-rose-500 to-pink-400 bg-clip-text text-3xl font-bold text-transparent">
           哄哄模拟器
         </h1>
         <p className="text-gray-500 text-sm leading-relaxed max-w-[260px] text-center">
