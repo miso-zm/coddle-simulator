@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { gender, voice, sceneId, round, totalRounds, currentScore, userChoice, userChoiceType, history, generateAudio } = parsed.data;
+    const { gender, voice, sceneId, round, totalRounds, currentScore, userChoice, userChoiceType, history } = parsed.data;
 
     // 查找场景
     const scene = SCENES.find((s) => s.id === sceneId);
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = buildSystemPrompt(gender as Gender, voice as VoiceType, scene.description);
 
     let userPrompt: string;
-    if (round === 1) {
+    if (round === 1 && !userChoice) {
       userPrompt = buildFirstRoundMessage(scene.description);
     } else if (!userChoice) {
       return NextResponse.json({ error: "缺少用户选择" }, { status: 400 });

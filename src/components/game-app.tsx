@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type {
-  GameState,
   ChatMessage,
   ChatOption,
   Gender,
@@ -22,7 +21,13 @@ import { ChatBubble } from "./chat-bubble";
 import { OptionButtons } from "./option-buttons";
 import { Avatar } from "./avatar";
 import { cn } from "@/lib/utils";
-import { saveLocalRecord, getSavedVoice, getSavedGender } from "@/lib/storage";
+import {
+  saveLocalRecord,
+  getSavedVoice,
+  getSavedGender,
+  saveVoice,
+  saveGender,
+} from "@/lib/storage";
 import { BestRecordsPanel } from "./best-records-panel";
 import { useSearchParams } from "next/navigation";
 
@@ -32,6 +37,11 @@ interface HistoryItem {
   user: string;
   partner: string;
   scoreChange: number;
+}
+
+interface FailedSelection {
+  option: ChatOption;
+  index: number;
 }
 
 export function GameApp() {
@@ -53,8 +63,8 @@ export function GameApp() {
   const [animateDirection, setAnimateDirection] = useState<"up" | "down" | null>(
     null,
   );
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [failedSelection, setFailedSelection] = useState<FailedSelection | null>(null);
   const [recordToast, setRecordToast] = useState<string | null>(null);
   const [hasSavedRecord, setHasSavedRecord] = useState(false);
 
@@ -96,10 +106,17 @@ export function GameApp() {
 
   // 初始化时读取本地存储
   useEffect(() => {
-    const savedVoice = getSavedVoice() as VoiceType | null;
-    const savedGender = getSavedGender() as Gender | null;
-    if (savedVoice) setVoice(savedVoice);
-    if (savedGender) setGender(savedGender);
+    const savedGender = getSavedGender();
+    const validGender = savedGender === "girlfriend" || savedGender === "boyfriend"
+      ? savedGender
+      : null;
+    const savedVoice = getSavedVoice();
+    const validVoice = VOICE_OPTIONS.find(
+      (item) => item.id === savedVoice && (!validGender || item.gender === validGender),
+    );
+
+    if (validGender) setGender(validGender);
+    if (validVoice) setVoice(validVoice.id);
   }, []);
 
   // 游戏结束时保存记录到服务器（登录用户）
@@ -188,6 +205,7 @@ export function GameApp() {
       setMessages([]);
       setCurrentOptions([]);
       setHistory([]);
+      setFailedSelection(null);
       setHasSavedRecord(false);
       setRecordToast(null);
       setIsLoading(true);
@@ -198,8 +216,10 @@ export function GameApp() {
         let data: { message: string; scoreChange: number; options: ChatOption[]; selectedAnalysis: string };
 
         if (preloadPromiseRef.current?.sceneId === selectedScene.id) {
-          data = await preloadPromiseRef.current.promise;
+          const preloadedRequest = preloadPromiseRef.current.promise;
+          // 无论成功失败都只消费一次；失败重试时应发起新请求，而不是反复等待同一个 rejected promise。
           preloadPromiseRef.current = null;
+          data = await preloadedRequest;
         } else {
           const response = await fetch("/api/chat", {
             method: "POST",
@@ -243,7 +263,7 @@ export function GameApp() {
         setIsLoading(false);
       }
     },
-    [gender, voice],
+    [fetchAudioForMessage, gender, voice],
   );
 
   // 选择选项后进入下一轮
@@ -251,7 +271,7 @@ export function GameApp() {
     async (option: ChatOption, index: number) => {
       if (isLoading || !scene || !gender || !voice) return;
 
-      setSelectedOption(index);
+      setFailedSelection(null);
       setIsLoading(true);
       setError(null);
 
@@ -275,10 +295,13 @@ export function GameApp() {
             gender,
             voice,
             sceneId: scene.id,
-            round: round + 1,
+            // round 表示玩家当前正在作答的轮次。首轮开场同样使用 1，
+            // 是否为开场由服务端根据 userChoice 判断，避免第 10 轮请求成第 11 轮。
+            round,
             totalRounds: TOTAL_ROUNDS,
             currentScore: score,
             userChoice: option.text,
+            userChoiceType: option.type,
             history,
             generateAudio: true,
           }),
@@ -309,7 +332,7 @@ export function GameApp() {
           id: partnerMsgId,
           role: "partner",
           text: data.message,
-          round: round + 1,
+          round,
           scoreChange: data.scoreChange,
           audioUri: undefined,
           analysis: data.selectedAnalysis || "",
@@ -329,19 +352,19 @@ export function GameApp() {
         // 判断游戏结束
         if (newScore >= WIN_SCORE) {
           setPhase("won");
-          saveLocalRecord(scene.id, round + 1, newScore, true);
+          saveLocalRecord(scene.id, round, newScore, true);
           setIsLoading(false);
           return;
         }
 
         if (newScore <= LOSE_SCORE) {
           setPhase("lost");
-          saveLocalRecord(scene.id, round + 1, newScore, false);
+          saveLocalRecord(scene.id, round, newScore, false);
           setIsLoading(false);
           return;
         }
 
-        if (round + 1 > TOTAL_ROUNDS) {
+        if (round >= TOTAL_ROUNDS) {
           // 用完了所有轮次
           setPhase("lost");
           saveLocalRecord(scene.id, TOTAL_ROUNDS, newScore, false);
@@ -352,25 +375,37 @@ export function GameApp() {
         // 继续下一轮
         setRound(round + 1);
         setCurrentOptions(data.options);
-        setSelectedOption(null);
       } catch (err) {
+        // 失败的选择没有进入 history，移除临时气泡后允许原样重试。
+        setMessages((prev) => prev.filter((message) => message.id !== userMsgId));
+        setFailedSelection({ option, index });
         setError(err instanceof Error ? err.message : "出错了，请重试");
-        // 回滚用户消息？
       } finally {
         setIsLoading(false);
       }
     },
-    [gender, voice, scene, round, score, history, isLoading, triggerScoreAnimation],
+    [
+      fetchAudioForMessage,
+      gender,
+      history,
+      isLoading,
+      round,
+      scene,
+      score,
+      triggerScoreAnimation,
+      voice,
+    ],
   );
 
   // 重试当前轮
   const retryRound = useCallback(() => {
     setError(null);
-    if (round === 1 && scene) {
+    if (failedSelection) {
+      handleSelectOption(failedSelection.option, failedSelection.index);
+    } else if (round === 1 && scene) {
       startGame(scene);
     }
-    // TODO: 其他轮次的重试逻辑
-  }, [round, scene, startGame]);
+  }, [failedSelection, handleSelectOption, round, scene, startGame]);
 
   // 重新开始
   const restartGame = useCallback(() => {
@@ -421,12 +456,16 @@ export function GameApp() {
       <GenderSelectScreen
         onSelect={(g) => {
           setGender(g);
+          saveGender(g);
           if (voice && VOICE_OPTIONS.find(v => v.id === voice)?.gender === g) {
             setPhase("scene-select");
           } else {
             // 设置默认声音
             const defaultVoice = VOICE_OPTIONS.find((v) => v.gender === g);
-            if (defaultVoice) setVoice(defaultVoice.id as VoiceType);
+            if (defaultVoice) {
+              setVoice(defaultVoice.id);
+              saveVoice(defaultVoice.id);
+            }
             setPhase("scene-select");
           }
         }}
@@ -459,6 +498,7 @@ export function GameApp() {
         selectedVoice={voice}
         onSelect={(v) => {
           setVoice(v);
+          saveVoice(v);
           // 如果是从场景页来的，回去
           setPhase("scene-select");
         }}
@@ -960,7 +1000,7 @@ function VoiceSelectScreen({
 
   const [playingId, setPlayingId] = useState<string | null>(null);
 
-  const playSample = async (voiceId: string, speakerId: string) => {
+  const playSample = async (voiceId: string) => {
     if (playingId) return;
     setPlayingId(voiceId);
 
@@ -1029,7 +1069,7 @@ function VoiceSelectScreen({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                playSample(v.id, v.speakerId);
+                playSample(v.id);
               }}
               className={cn(
                 "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
