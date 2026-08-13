@@ -1,0 +1,6 @@
+.env*
+.git
+.next
+dist
+node_modules
+tmp
